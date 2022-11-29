@@ -11,13 +11,14 @@ import styled from '../styles/styled';
 import tableCellClasses, { getTableCellUtilityClass } from './tableCellClasses';
 
 const useUtilityClasses = (ownerState) => {
-  const { classes, variant, align, padding, size, stickyHeader } = ownerState;
+  const { classes, variant, align, padding, size, stickyHeader, stackResponsive } = ownerState;
 
   const slots = {
     root: [
       'root',
       variant,
       stickyHeader && 'stickyHeader',
+      stackResponsive && 'stackResponsive',
       align !== 'inherit' && `align${capitalize(align)}`,
       padding !== 'normal' && `padding${capitalize(padding)}`,
       `size${capitalize(size)}`,
@@ -42,72 +43,94 @@ const TableCellRoot = styled('td', {
       ownerState.stickyHeader && styles.stickyHeader,
     ];
   },
-})(({ theme, ownerState }) => ({
-  ...theme.typography.body2,
-  display: 'table-cell',
-  verticalAlign: 'inherit',
-  // Workaround for a rendering bug with spanned columns in Chrome 62.0.
-  // Removes the alpha (sets it to 1), and lightens or darkens the theme color.
-  borderBottom: theme.vars
-    ? `1px solid ${theme.vars.palette.TableCell.border}`
-    : `1px solid
+})(({ theme, ownerState }) => {
+  return {
+    ...theme.typography.body2,
+    display: 'table-cell',
+    verticalAlign: 'inherit',
+    // Workaround for a rendering bug with spanned columns in Chrome 62.0.
+    // Removes the alpha (sets it to 1), and lightens or darkens the theme color.
+    borderBottom: theme.vars
+      ? `1px solid ${theme.vars.palette.TableCell.border}`
+      : `1px solid
     ${
       theme.palette.mode === 'light'
         ? lighten(alpha(theme.palette.divider, 1), 0.88)
         : darken(alpha(theme.palette.divider, 1), 0.68)
     }`,
-  textAlign: 'left',
-  padding: 16,
-  ...(ownerState.variant === 'head' && {
-    color: (theme.vars || theme).palette.text.primary,
-    lineHeight: theme.typography.pxToRem(24),
-    fontWeight: theme.typography.fontWeightMedium,
-  }),
-  ...(ownerState.variant === 'body' && {
-    color: (theme.vars || theme).palette.text.primary,
-  }),
-  ...(ownerState.variant === 'footer' && {
-    color: (theme.vars || theme).palette.text.secondary,
-    lineHeight: theme.typography.pxToRem(21),
-    fontSize: theme.typography.pxToRem(12),
-  }),
-  ...(ownerState.size === 'small' && {
-    padding: '6px 16px',
-    [`&.${tableCellClasses.paddingCheckbox}`]: {
-      width: 24, // prevent the checkbox column from growing
-      padding: '0 12px 0 16px',
-      '& > *': {
-        padding: 0,
-      },
-    },
-  }),
-  ...(ownerState.padding === 'checkbox' && {
-    width: 48, // prevent the checkbox column from growing
-    padding: '0 0 0 4px',
-  }),
-  ...(ownerState.padding === 'none' && {
-    padding: 0,
-  }),
-  ...(ownerState.align === 'left' && {
     textAlign: 'left',
-  }),
-  ...(ownerState.align === 'center' && {
-    textAlign: 'center',
-  }),
-  ...(ownerState.align === 'right' && {
-    textAlign: 'right',
-    flexDirection: 'row-reverse',
-  }),
-  ...(ownerState.align === 'justify' && {
-    textAlign: 'justify',
-  }),
-  ...(ownerState.stickyHeader && {
-    position: 'sticky',
-    top: 0,
-    zIndex: 2,
-    backgroundColor: (theme.vars || theme).palette.background.default,
-  }),
-}));
+    padding: 16,
+    ...(ownerState.variant === 'head' && {
+      color: (theme.vars || theme).palette.text.primary,
+      lineHeight: theme.typography.pxToRem(24),
+      fontWeight: theme.typography.fontWeightMedium,
+    }),
+    ...(ownerState.variant === 'body' && {
+      color: (theme.vars || theme).palette.text.primary,
+    }),
+    ...(ownerState.variant === 'footer' && {
+      color: (theme.vars || theme).palette.text.secondary,
+      lineHeight: theme.typography.pxToRem(21),
+      fontSize: theme.typography.pxToRem(12),
+    }),
+    ...(ownerState.size === 'small' && {
+      padding: '6px 16px',
+      [`&.${tableCellClasses.paddingCheckbox}`]: {
+        width: 24, // prevent the checkbox column from growing
+        padding: '0 12px 0 16px',
+        '& > *': {
+          padding: 0,
+        },
+      },
+    }),
+    ...(ownerState.padding === 'checkbox' && {
+      width: 48, // prevent the checkbox column from growing
+      padding: '0 0 0 4px',
+    }),
+    ...(ownerState.padding === 'none' && {
+      padding: 0,
+    }),
+    ...(ownerState.align === 'left' && {
+      textAlign: 'left',
+    }),
+    ...(ownerState.align === 'center' && {
+      textAlign: 'center',
+    }),
+    ...(ownerState.align === 'right' && {
+      textAlign: 'right',
+      flexDirection: 'row-reverse',
+    }),
+    ...(ownerState.align === 'justify' && {
+      textAlign: 'justify',
+    }),
+    ...(ownerState.stickyHeader && {
+      position: 'sticky',
+      top: 0,
+      zIndex: 2,
+      backgroundColor: (theme.vars || theme).palette.background.default,
+    }),
+    ...(ownerState.stackResponsive && {
+      [theme.breakpoints.down('sm')]: {
+        '&': { border: 'none' },
+      },
+    }),
+    ...(ownerState.stackResponsive &&
+      ownerState.component === 'th' &&
+      ownerState.variant === 'head' && {
+        [theme.breakpoints.down('sm')]: {
+          display: 'none',
+        },
+      }),
+    ...(ownerState.stackResponsive &&
+      ownerState.component === 'th' &&
+      ownerState.variant !== 'head' && {
+        [theme.breakpoints.up('sm')]: {
+          display: 'none',
+          width: 0,
+        },
+      }),
+  };
+});
 
 /**
  * The component renders a `<th>` element when the parent context is a header
@@ -154,6 +177,7 @@ const TableCell = React.forwardRef(function TableCell(inProps, ref) {
     size: sizeProp || (table && table.size ? table.size : 'medium'),
     sortDirection,
     stickyHeader: variant === 'head' && table && table.stickyHeader,
+    stackResponsive: table && table.stackResponsive,
     variant,
   };
 

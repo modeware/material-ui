@@ -34,6 +34,12 @@ export interface TableTypeMap<P = {}, D extends React.ElementType = 'table'> {
      * @default false
      */
     stickyHeader?: boolean;
+    /*
+    * Makes the table rows stack in mobile view
+    * Requires additional th tags in table body
+    * See Example
+    */
+    stackResponsive?: boolean;
     /**
      * The system prop that allows defining system overrides as well as additional CSS styles.
      */

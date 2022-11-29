@@ -8,10 +8,10 @@ import styled from '../styles/styled';
 import { getTableUtilityClass } from './tableClasses';
 
 const useUtilityClasses = (ownerState) => {
-  const { classes, stickyHeader } = ownerState;
+  const { classes, stickyHeader, stackResponsive } = ownerState;
 
   const slots = {
-    root: ['root', stickyHeader && 'stickyHeader'],
+    root: ['root', stickyHeader && 'stickyHeader', stackResponsive && 'stackResponsive'],
   };
 
   return composeClasses(slots, getTableUtilityClass, classes);
@@ -23,7 +23,13 @@ const TableRoot = styled('table', {
   overridesResolver: (props, styles) => {
     const { ownerState } = props;
 
-    return [styles.root, ownerState.stickyHeader && styles.stickyHeader];
+    return [
+      styles.root,
+      ownerState.stickyHeader &&
+        styles.stickyHeader &&
+        ownerState.stackResponsive &&
+        styles.stackResponsive,
+    ];
   },
 })(({ theme, ownerState }) => ({
   display: 'table',
@@ -52,6 +58,7 @@ const Table = React.forwardRef(function Table(inProps, ref) {
     padding = 'normal',
     size = 'medium',
     stickyHeader = false,
+    stackResponsive = false,
     ...other
   } = props;
 
@@ -61,13 +68,14 @@ const Table = React.forwardRef(function Table(inProps, ref) {
     padding,
     size,
     stickyHeader,
+    stackResponsive,
   };
 
   const classes = useUtilityClasses(ownerState);
 
   const table = React.useMemo(
-    () => ({ padding, size, stickyHeader }),
-    [padding, size, stickyHeader],
+    () => ({ padding, size, stickyHeader, stackResponsive }),
+    [padding, size, stickyHeader, stackResponsive],
   );
 
   return (
@@ -119,6 +127,12 @@ Table.propTypes /* remove-proptypes */ = {
     PropTypes.oneOf(['medium', 'small']),
     PropTypes.string,
   ]),
+
+  /**
+   * Makes the table rows stack in mobile view
+   */
+  stackResponsive: PropTypes.bool,
+
   /**
    * Set the header sticky.
    *
